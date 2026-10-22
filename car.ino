@@ -23,6 +23,35 @@ const int left_pwm_pin  = 40;
 // Motor Speed
 int left_spd;
 
+uint32_t calibrations[2][8] = {
+    635,	626,	522,	612,	499,	635,	589,	681,
+    1865,	1874,	1978,	1886,	1902,	1865,	1911,	1819
+};
+
+#define NUM_SENSORS 8
+
+double calibrated_sensor[NUM_SENSORS];
+
+/// TODO: rewrite to return readingays
+void sensor_calibrate(uint32_t calibrations[]) {
+    for (uint32_t i = 0; i < NUM_SENSORS; i++)
+    {
+        calibrated_sensor[i] = (calibrations[i] - calibrations[0][i]) * 1000.0 / calibrations[1][i];
+    }
+}
+
+double weights = {-15, -14, -12, -8, 8, 12, 14, 15};
+
+/// positive output is the left sensor responding, neg output is right sensor responding
+double sensor_weighting(double reading[]) {
+    double ans = 0;
+    for (uint8_t i = 0; i < NUM_SENSORS; i++)
+    {
+        ans += weights[i] * reading[i];
+    }
+    return (ans / 8);
+}
+
 // Encoder Variables
 long enc_bin_cnt;
 const unsigned long enc_bin_len = 50; // 50 ms bins
