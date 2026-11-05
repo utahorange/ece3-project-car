@@ -6,6 +6,11 @@
 const int left_nslp_pin = 31;
 const int left_dir_pin  = 29;
 const int left_pwm_pin  = 40;
+
+const int right_nslp_pin = 11;
+const int right_dir_pin  = 30;
+const int right_pwm_pin = 39;
+
 const int LED_RF = 41;
 
 #define NUM_SAMPLES 5
@@ -19,6 +24,11 @@ uint16_t sensor_values[NUM_SENSORS];
 double calibrated_sensor[NUM_SENSORS];
 double weights[] = {-15, -14, -12, -8, 8, 12, 14, 15};
 bool start_car = false;
+double fused_sensors = 0;
+double kv_constant = 0.007; 
+int basic_speed = 30;
+int left_spd = 0;
+int right_spd = 0;
 
 /// --- Helpers ---
 void sensor_calibrate() {
@@ -56,6 +66,14 @@ bool check_black() {
     return (num > 6);
 }
 
+int abs(int n) {
+  if (n >= 0) {
+    return n;
+  } else {
+    return -1 * n;
+  }
+}
+
 // Encoder Variables
 long enc_bin_cnt;
 const unsigned long enc_bin_len = 50; // 50 ms bins
@@ -67,8 +85,6 @@ const unsigned long enc_bin_len = 50; // 50 ms bins
 
 ///////////////////////////////////
 void setup() {
-// This function runs once
-
   // Pin Settings
   pinMode(left_nslp_pin,OUTPUT);
   pinMode(left_dir_pin,OUTPUT);
@@ -77,7 +93,9 @@ void setup() {
 
   // Setting Initial Values
   digitalWrite(left_dir_pin,LOW);
-  digitalWrite(left_nslp_pin,HIGH);
+  digitalWrite(left_nslp_pin,LOW);
+  digitalWrite(right_dir_pin,LOW);
+  digitalWrite(right_nslp_pin,LOW);
 
   ECE3_Init(); // Used for encoder functionality
 
@@ -86,9 +104,18 @@ void setup() {
   delay(2000); //Wait 2 seconds before starting 
 }
 
+// void print_arr(uint8_t arr[NUM_SENSORS]) {
+//    // TODO
+//    for (uint8_t i = 0; i < NUM_SENSORS; i++)
+//    {
+//     Serial.print(arr[i]);
+//     Serial.print(" ");
+//    }
+// }
+
 void loop() {
   // Report encoder counts and speed
-  Serial.print("Starting loop");
+  Serial.print("--- Starting loop\n");
   uint16_t summed_values[8] = {0};
 
   // Take the average of 5 consecutive values for each sensor
@@ -124,17 +151,41 @@ void loop() {
  
   bool is_black = check_black();
   if (!start_car && is_black) {
-    Serial.print("start car set to true\n");
+    Serial.print("--- Start car set to true\n");
     start_car = true;
+    digitalWrite(left_nslp_pin,HIGH);
+    digitalWrite(right_nslp_pin,HIGH);
   }
 
   if (start_car) {
-    digitalWrite(LED_RF, HIGH);
-    delay(250);
-    digitalWrite(LED_RF, LOW);
-    delay(250);
+    // digitalWrite(LED_RF, HIGH);
+    // delay(250);
+    // digitalWrite(LED_RF, LOW);
+    // delay(250);
+    fused_sensors = sensor_weighting();
+   
+    // --- Turn our car ---
+    left_spd = basic_speed - fused_sensors * kv_constant;
+    right_spd = basic_speed + fused_sensors * kv_constant;
+    
+    // flip direction of motor
+    if (left_spd < 0) {
+      digitalWrite(left_dir_pin,HIGH);
+    } else {
+      digitalWrite(left_dir_pin,LOW);
+    }
+    if (right_spd < 0) {
+      digitalWrite(right_dir_pin,HIGH);
+    } else {
+      digitalWrite(right_dir_pin,LOW);
+    }
+
+    // set speed pins to abs value of their speeds
+    analogWrite(left_pwm_pin, abs(left_spd));
+    analogWrite(right_pwm_pin, abs(right_spd));
+    
     // check if multiple
-    // do turning
   }
-  delay(5000);
+  // delay(5000);
 }
+
