@@ -1,4 +1,4 @@
-#include <ECE3.h> // Used for encoder functionality
+#include <ECE3.h>
 
 // Car No. 75
 
@@ -22,10 +22,14 @@ uint32_t calibrations[2][NUM_SENSORS] = {
 
 uint16_t sensor_values[NUM_SENSORS];
 double calibrated_sensor[NUM_SENSORS];
-double weights[] = {-15, -14, -12, -8, 8, 12, 14, 15};
+// double weights[] = {-15, -14, -12, -8, 8, 12, 14, 15};
+double weights[] = {-25, -14, -12, -8, 8, 12, 14, 25};
 bool start_car = false;
 double fused_sensors = 0;
-double kv_constant = 0.007; 
+double prev_fused_sensors = 0;
+double kd_constant = 0.01; // 0.007; 
+double kp_constant = 0.007;
+uint8_t num_complete_turns = 0;
 int basic_speed = 30;
 int left_spd = 0;
 int right_spd = 0;
@@ -34,11 +38,7 @@ int right_spd = 0;
 void sensor_calibrate() {
   for (uint32_t i = 0; i < NUM_SENSORS; i++)
   {
-    // if (calibrations[0][i] > sensor_values[i]) {
-    //   calibrated_sensor[i] = 0;
-    // } else {
-      calibrated_sensor[i] = (sensor_values[i] - calibrations[0][i]) * 1000.0 / calibrations[1][i];
-    // }
+    calibrated_sensor[i] = (sensor_values[i] - calibrations[0][i]) * 1000.0 / calibrations[1][i];
     if (calibrated_sensor[i] > 3000) {
       calibrated_sensor[i] = 0;
     }
@@ -74,15 +74,6 @@ int abs(int n) {
   }
 }
 
-// Encoder Variables
-long enc_bin_cnt;
-const unsigned long enc_bin_len = 50; // 50 ms bins
-    // Encoder Speed Calculation Explanation:
-    // We wait for a set amount of time (enc_bin_len), and find how many
-    // times the encoder has incremented in that period. We call 
-    // this period a bin when refering to the encoder. The number 
-    // encoder counts per bin is a proportional to speed.
-
 ///////////////////////////////////
 void setup() {
   // Pin Settings
@@ -104,19 +95,9 @@ void setup() {
   delay(2000); //Wait 2 seconds before starting 
 }
 
-// void print_arr(uint8_t arr[NUM_SENSORS]) {
-//    // TODO
-//    for (uint8_t i = 0; i < NUM_SENSORS; i++)
-//    {
-//     Serial.print(arr[i]);
-//     Serial.print(" ");
-//    }
-// }
-
 void loop() {
-  // Report encoder counts and speed
   Serial.print("--- Starting loop\n");
-  uint16_t summed_values[8] = {0};
+  uint16_t summed_values[NUM_SENSORS] = {0};
 
   // Take the average of 5 consecutive values for each sensor
   for (uint16_t j = 0; j < NUM_SAMPLES; j++){
@@ -124,7 +105,7 @@ void loop() {
     ECE3_read_IR(sensor_values);
 
     // Add the current sensor values using a for loop
-    for (unsigned char i = 0; i < 8; i++)
+    for (uint8_t i = 0; i < NUM_SENSORS; i++)
     {
       summed_values[i] += sensor_values[i];
     }
@@ -158,15 +139,21 @@ void loop() {
   }
 
   if (start_car) {
+
+    if (is_black) {
+      /// TODO: do a turn
+
+      num_complete_turns++;
+    }
     // digitalWrite(LED_RF, HIGH);
     // delay(250);
     // digitalWrite(LED_RF, LOW);
     // delay(250);
     fused_sensors = sensor_weighting();
-   
+    
     // --- Turn our car ---
-    left_spd = basic_speed - fused_sensors * kv_constant;
-    right_spd = basic_speed + fused_sensors * kv_constant;
+    left_spd = basic_speed - (fused_sensors * kd_constant) + ((prev_fused_sensors - fused_sensors) * kp_constant);
+    right_spd = basic_speed + (fused_sensors * kd_constant) - ((prev_fused_sensors - fused_sensors) * kp_constant);
     
     // flip direction of motor
     if (left_spd < 0) {
@@ -185,7 +172,7 @@ void loop() {
     analogWrite(right_pwm_pin, abs(right_spd));
     
     // check if multiple
+    prev_fused_sensors = fused_sensors;
   }
   // delay(5000);
 }
-
