@@ -96,7 +96,7 @@ void setup() {
 }
 
 void loop() {
-  Serial.print("--- Starting loop\n");
+  // Serial.print("--- Starting loop\n");
   uint16_t summed_values[NUM_SENSORS] = {0};
 
   // Take the average of 5 consecutive values for each sensor
@@ -111,28 +111,28 @@ void loop() {
     }
   }
 
-  Serial.print("sensor_values: ");
-  for (uint8_t i = 0; i < NUM_SENSORS; i++)
-  {
-    sensor_values[i] = summed_values[i] / NUM_SAMPLES;
-    Serial.print(sensor_values[i]);
-    Serial.print(" ");
-  }
-  Serial.print("\n");
+  // Serial.print("sensor_values: ");
+  // for (uint8_t i = 0; i < NUM_SENSORS; i++)
+  // {
+  //   sensor_values[i] = summed_values[i] / NUM_SAMPLES;
+  //   Serial.print(sensor_values[i]);
+  //   Serial.print(" ");
+  // }
+  // Serial.print("\n");
 
   sensor_calibrate();
 
-  Serial.print("calibrated_sensor: ");
-  for (uint8_t i = 0; i < NUM_SENSORS; i++)
-  {
-    Serial.print(calibrated_sensor[i]);
-    Serial.print(" ");
-  }
-  Serial.print("\n");
+  // Serial.print("calibrated_sensor: ");
+  // for (uint8_t i = 0; i < NUM_SENSORS; i++)
+  // {
+  //   Serial.print(calibrated_sensor[i]);
+  //   Serial.print(" ");
+  // }
+  // Serial.print("\n");
  
   bool is_black = check_black();
   if (!start_car && is_black) {
-    Serial.print("--- Start car set to true\n");
+    // Serial.print("--- Start car set to true\n");
     start_car = true;
     digitalWrite(left_nslp_pin,HIGH);
     digitalWrite(right_nslp_pin,HIGH);
