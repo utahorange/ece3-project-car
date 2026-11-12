@@ -15,7 +15,7 @@ const int LED_RF = 41;
 
 #define NUM_SAMPLES 5
 #define NUM_SENSORS 8
-#define DEFAULT_SPEED 150 
+#define DEFAULT_SPEED 75 
 #define TURN_SPEED 50 
 #define U_TURN_SPEED 60
 
@@ -32,7 +32,7 @@ bool start_car = false;
 float fused_sensors = 0;
 float prev_fused_sensors = 0;
 
-int basic_speed = 255;
+int basic_speed = 60;
 float kd_constant = basic_speed * 0.5 / 1000; // 0.007; 
 float kp_constant = kd_constant / 5; // btwn 5 to 10
 uint8_t num_black = 0;
@@ -199,8 +199,8 @@ void loop() {
         else {
           basic_speed = 175;
         }
-        kd_constant = basic_speed * 0.25 / 1000;
-        kp_constant = kd_constant * 3;
+        kd_constant = basic_speed * 0.5 / 1000;
+        kp_constant = kd_constant * 5;
       } else if (abs(fused_sensors) > 2000) { // turns
         if (basic_speed >= TURN_SPEED) {
              basic_speed = basic_speed * 0.75;
@@ -209,7 +209,7 @@ void loop() {
           basic_speed = TURN_SPEED;
         }
         kd_constant = basic_speed * 0.75 / 1000;
-        kp_constant = kd_constant / 5;
+        kp_constant = kd_constant / 3;
       } else { // not turning and not on straight
         if (basic_speed >= DEFAULT_SPEED) {
              basic_speed = basic_speed * 0.95;
@@ -217,7 +217,7 @@ void loop() {
         else {
           basic_speed = DEFAULT_SPEED;
         }
-        kd_constant = basic_speed * 0.25 / 1000;
+        kd_constant = basic_speed * 0.5 / 1000;
         kp_constant = kd_constant;
       }
       
