@@ -30,7 +30,7 @@ uint32_t calibrations[2][NUM_SENSORS] = {
 uint16_t sensor_values[NUM_SENSORS];
 float calibrated_sensor[NUM_SENSORS];
 // float weights[] = {-15, -14, -12, -8, 8, 12, 14, 15};
-float weights[] = {-25, -14, -12, -8, 8, 12, 14, 25};
+float weights[] = {-30, -17, -12, -8, 8, 12, 17, 30};
 bool start_car = false;
 float fused_sensors = 0;
 float prev_fused_sensors = 0;
