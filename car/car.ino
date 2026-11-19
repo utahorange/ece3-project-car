@@ -121,6 +121,8 @@ void setup() {
   digitalWrite(left_nslp_pin,HIGH);
   digitalWrite(right_nslp_pin,HIGH);
 }
+// int32_t getEncoderCount_left();
+// int32_t getEncoderCount_right();
 
 void do_u_turn() {
   basic_speed = U_TURN_SPEED;
@@ -199,14 +201,13 @@ void loop() {
       fused_sensors = sensor_weighting();
       
       if (abs(fused_sensors) < 750) { // speedup
-        if (basic_speed <= 255) {
-             basic_speed = basic_speed * 1.05;
+        if (basic_speed <= 170) {
+          basic_speed = basic_speed * 1.05;
+        } else {
+          basic_speed = 170;
         }
-        else {
-          basic_speed = 175;
-        }
-        kd_constant = basic_speed * 0.5 / 1000;
-        kp_constant = kd_constant * 5;
+        kd_constant = basic_speed * 0.25 / 1000;
+        kp_constant = kd_constant * 2;
       } else if (abs(fused_sensors) > 2000) { // turns
         if (basic_speed >= TURN_SPEED) {
              basic_speed = basic_speed * 0.75;
@@ -214,7 +215,7 @@ void loop() {
         else {
           basic_speed = TURN_SPEED;
         }
-        kd_constant = basic_speed * 0.75 / 1000;
+        kd_constant = basic_speed * 0.5 / 1000;
         kp_constant = kd_constant / 3;
       } else { // not turning and not on straight
         if (basic_speed >= DEFAULT_SPEED) {
@@ -223,7 +224,7 @@ void loop() {
         else {
           basic_speed = DEFAULT_SPEED;
         }
-        kd_constant = basic_speed * 0.5 / 1000;
+        kd_constant = basic_speed * 0.25 / 1000;
         kp_constant = kd_constant;
       }
       
