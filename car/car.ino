@@ -1,6 +1,9 @@
 #include <ECE3.h>
 
 // Car No. 75
+/// TODO: make car wiggle less on straights, maybe make it think more is straight
+// should think less about going off of straight
+// inc kd on straights
 
 // Pin Assignments
 const int left_nslp_pin = 31;
@@ -108,7 +111,10 @@ void setup() {
   ECE3_Init(); // Used for encoder functionality
 
   Serial.begin(9600); // data rate for serial data transmission
-  
+ 
+  resetEncoderCount_left();
+  resetEncoderCount_right();
+
   delay(2000); //Wait 2 seconds before starting 
 
   start_car = true;
