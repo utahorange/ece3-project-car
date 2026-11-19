@@ -18,9 +18,9 @@ const int LED_RF = 41;
 
 #define NUM_SAMPLES 5
 #define NUM_SENSORS 8
-#define DEFAULT_SPEED 75 
-#define TURN_SPEED 50 
-#define U_TURN_SPEED 60
+#define DEFAULT_SPEED 80 
+#define TURN_SPEED 60 
+#define U_TURN_SPEED 100
 
 uint32_t calibrations[2][NUM_SENSORS] = {
     635,	626,	522,	612,	499,	635,	589,	681,
@@ -30,7 +30,7 @@ uint32_t calibrations[2][NUM_SENSORS] = {
 uint16_t sensor_values[NUM_SENSORS];
 float calibrated_sensor[NUM_SENSORS];
 // float weights[] = {-15, -14, -12, -8, 8, 12, 14, 15};
-float weights[] = {-30, -17, -12, -8, 8, 12, 17, 30};
+float weights[] = {-45, -26, -16, -8, 8, 16, 26, 45};
 bool start_car = false;
 float fused_sensors = 0;
 float prev_fused_sensors = 0;
@@ -130,7 +130,7 @@ void do_u_turn() {
   digitalWrite(right_dir_pin,LOW);
   analogWrite(left_pwm_pin, basic_speed);
   analogWrite(right_pwm_pin, basic_speed);
-  delay(1000);
+  delay(600);
 }
 
 void loop() {
@@ -201,12 +201,12 @@ void loop() {
       fused_sensors = sensor_weighting();
       
       if (abs(fused_sensors) < 750) { // speedup
-        if (basic_speed <= 170) {
+        if (basic_speed <= 100) {
           basic_speed = basic_speed * 1.05;
         } else {
-          basic_speed = 170;
+          basic_speed = 100;
         }
-        kd_constant = basic_speed * 0.25 / 1000;
+        kd_constant = basic_speed * 0.2 / 1000;
         kp_constant = kd_constant * 2;
       } else if (abs(fused_sensors) > 2000) { // turns
         if (basic_speed >= TURN_SPEED) {
