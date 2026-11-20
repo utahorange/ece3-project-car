@@ -36,8 +36,9 @@ float fused_sensors = 0;
 float prev_fused_sensors = 0;
 
 int basic_speed = 60;
-float kd_constant = basic_speed * 0.5 / 1000; // 0.007; 
-float kp_constant = kd_constant / 5; // btwn 5 to 10
+// in general, kp_constant should be 10 times that of kd_constant
+float kp_constant = basic_speed * 0.5 / 1000; // 0.007; 
+float kd_constant = kp_constant / 5; // btwn 5 to 10
 uint8_t num_black = 0;
 uint8_t num_white = 0;
 uint8_t num_complete_turns = 0;
@@ -212,8 +213,8 @@ void loop() {
         } else {
           basic_speed = 100;
         }
-        kd_constant = basic_speed * 0.2 / 1000;
-        kp_constant = kd_constant * 2;
+        kp_constant = basic_speed * 0.2 / 1000;
+        kd_constant = kp_constant * 2;
       } else if (abs(fused_sensors) > 2000) { // turns
         if (basic_speed >= TURN_SPEED) {
              basic_speed = basic_speed * 0.75;
@@ -221,8 +222,8 @@ void loop() {
         else {
           basic_speed = TURN_SPEED;
         }
-        kd_constant = basic_speed * 0.5 / 1000;
-        kp_constant = kd_constant / 3;
+        kp_constant = basic_speed * 0.5 / 1000;
+        kd_constant = kp_constant / 3;
       } else { // not turning and not on straight
         if (basic_speed >= DEFAULT_SPEED) {
              basic_speed = basic_speed * 0.95;
@@ -230,13 +231,13 @@ void loop() {
         else {
           basic_speed = DEFAULT_SPEED;
         }
-        kd_constant = basic_speed * 0.25 / 1000;
-        kp_constant = kd_constant;
+        kp_constant = basic_speed * 0.25 / 1000;
+        kd_constant = kp_constant;
       }
       
       // --- Turn our car ---
-      left_spd = basic_speed - (fused_sensors * kd_constant) + ((prev_fused_sensors - fused_sensors) * kp_constant);
-      right_spd = basic_speed + (fused_sensors * kd_constant) - ((prev_fused_sensors - fused_sensors) * kp_constant);
+      left_spd = basic_speed - (fused_sensors * kp_constant) + ((prev_fused_sensors - fused_sensors) * kd_constant);
+      right_spd = basic_speed + (fused_sensors * kp_constant) - ((prev_fused_sensors - fused_sensors) * kd_constant);
       
       // flip direction of motor
       if (left_spd < 0) {
