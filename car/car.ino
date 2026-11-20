@@ -1,10 +1,6 @@
 #include <ECE3.h>
 
 // Car No. 75
-/// TODO: make car wiggle less on straights, maybe make it think more is straight
-// should think less about going off of straight
-// inc kd on straights
-
 // Pin Assignments
 const int left_nslp_pin = 31;
 const int left_dir_pin  = 29;
@@ -217,18 +213,16 @@ void loop() {
         kd_constant = kp_constant * 2;
       } else if (abs(fused_sensors) > 2000) { // turns
         if (basic_speed >= TURN_SPEED) {
-             basic_speed = basic_speed * 0.75;
-        }
-        else {
+          basic_speed = basic_speed * 0.75;
+        } else {
           basic_speed = TURN_SPEED;
         }
         kp_constant = basic_speed * 0.5 / 1000;
         kd_constant = kp_constant / 3;
       } else { // not turning and not on straight
         if (basic_speed >= DEFAULT_SPEED) {
-             basic_speed = basic_speed * 0.95;
-        }
-        else {
+          basic_speed = basic_speed * 0.95;
+        } else {
           basic_speed = DEFAULT_SPEED;
         }
         kp_constant = basic_speed * 0.25 / 1000;
