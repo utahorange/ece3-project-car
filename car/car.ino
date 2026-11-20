@@ -30,7 +30,7 @@ uint32_t calibrations[2][NUM_SENSORS] = {
 uint16_t sensor_values[NUM_SENSORS];
 float calibrated_sensor[NUM_SENSORS];
 // float weights[] = {-15, -14, -12, -8, 8, 12, 14, 15};
-float weights[] = {-45, -26, -16, -8, 8, 16, 26, 45};
+float weights[] = {-50, -30, -16, -8, 8, 16, 30, 50};
 bool start_car = false;
 float fused_sensors = 0;
 float prev_fused_sensors = 0;
@@ -39,6 +39,7 @@ int basic_speed = 60;
 float kd_constant = basic_speed * 0.5 / 1000; // 0.007; 
 float kp_constant = kd_constant / 5; // btwn 5 to 10
 uint8_t num_black = 0;
+uint8_t num_white = 0;
 uint8_t num_complete_turns = 0;
 int left_spd = 0;
 int right_spd = 0;
@@ -176,6 +177,11 @@ void loop() {
   }
 
   bool is_white = check_white();
+  if (is_white == true) {
+    num_white++;
+  } else {
+    num_white = 0;
+  }
 
   if (start_car) {
     if (num_black >= 2) {
