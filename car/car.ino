@@ -14,8 +14,8 @@ const int LED_RF = 41;
 
 #define NUM_SAMPLES 5
 #define NUM_SENSORS 8
-#define DEFAULT_SPEED 80 
-#define TURN_SPEED 60 
+#define DEFAULT_SPEED 255 
+#define TURN_SPEED 200 
 #define U_TURN_SPEED 100
 
 uint32_t calibrations[2][NUM_SENSORS] = {
@@ -26,7 +26,7 @@ uint32_t calibrations[2][NUM_SENSORS] = {
 uint16_t sensor_values[NUM_SENSORS];
 float calibrated_sensor[NUM_SENSORS];
 // float weights[] = {-15, -14, -12, -8, 8, 12, 14, 15};
-float weights[] = {-50, -30, -16, -8, 8, 16, 30, 50};
+float weights[] = {-50, -30, -10, -3, 3, 10, 30, 50};
 bool start_car = false;
 float fused_sensors = 0;
 float prev_fused_sensors = 0;
@@ -219,14 +219,6 @@ void loop() {
         }
         kp_constant = basic_speed * 0.5 / 1000;
         kd_constant = kp_constant / 3;
-      } else { // not turning and not on straight
-        if (basic_speed >= DEFAULT_SPEED) {
-          basic_speed = basic_speed * 0.95;
-        } else {
-          basic_speed = DEFAULT_SPEED;
-        }
-        kp_constant = basic_speed * 0.25 / 1000;
-        kd_constant = kp_constant;
       }
       
       // --- Turn our car ---
